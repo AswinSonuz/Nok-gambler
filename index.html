@@ -6,210 +6,203 @@
 <title>Predictor 100</title>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+*{margin:0;padding:0;box-sizing:border-box;font-family:Poppins,sans-serif}
+body{
+  background:radial-gradient(circle at top,#1a1a1a,#000);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#fff;
 }
-
-body {
-  height: 100vh;
-  background: radial-gradient(circle at top, #1a1a1a, #000);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
+.app{max-width:360px;width:100%;padding:20px}
+h1{text-align:center;color:#d4af37;letter-spacing:3px;margin-bottom:10px}
+.balance{display:flex;justify-content:space-between;font-size:14px;margin-bottom:15px}
+.balance span{color:#00ffd5}
+.card{
+  background:#0f0f0f;
+  border-radius:18px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 0 20px rgba(255,255,255,.03)
 }
-
-.app {
-  width: 100%;
-  max-width: 360px;
-  padding: 20px;
-  text-align: center;
+.number-box{
+  height:90px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:52px;
+  color:#00ffd5
 }
-
-h1 {
-  font-size: 20px;
-  letter-spacing: 3px;
-  color: #d4af37;
-  margin-bottom: 15px;
+button{
+  width:100%;
+  padding:12px;
+  border-radius:30px;
+  border:none;
+  background:linear-gradient(135deg,#d4af37,#ffd700);
+  font-weight:600;
+  cursor:pointer;
 }
-
-/* Balance */
-.balance {
-  font-size: 14px;
-  color: #00ffd5;
-  margin-bottom: 15px;
+button:disabled{opacity:.6}
+input{
+  width:100%;
+  padding:10px;
+  margin-bottom:8px;
+  background:#111;
+  border:none;
+  border-radius:10px;
+  color:#fff;
+  text-align:center;
 }
-
-/* Number Display */
-.number-box {
-  height: 110px;
-  background: linear-gradient(145deg, #0d0d0d, #1f1f1f);
-  border-radius: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 60px;
-  font-weight: 700;
-  color: #00ffd5;
-  box-shadow: 0 0 20px rgba(0,255,213,0.2);
-  margin-bottom: 20px;
+.row{display:flex;gap:10px}
+.color-btn{
+  flex:1;
+  padding:15px;
+  border-radius:15px;
+  font-weight:600;
+  border:none;
+  color:#fff;
 }
-
-/* Inputs */
-.inputs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+.red{background:#c0392b}
+.blue{background:#2980b9}
+.result-color{
+  margin-top:10px;
+  padding:12px;
+  border-radius:12px;
+  text-align:center;
+  font-weight:600;
 }
-
-input {
-  flex: 1;
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  background: #111;
-  color: #fff;
-  text-align: center;
-  font-size: 14px;
+.deposit-modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.8);
+  display:none;
+  justify-content:center;
+  align-items:center;
 }
-
-input::placeholder {
-  color: #666;
+.deposit-box{
+  background:#0f0f0f;
+  padding:20px;
+  border-radius:20px;
+  width:300px;
+  text-align:center;
 }
-
-/* Button */
-button {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  border: none;
-  border-radius: 50px;
-  background: linear-gradient(135deg, #d4af37, #ffd700);
-  color: #000;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 10px 25px rgba(212,175,55,0.4);
-  transition: 0.2s;
+.loader{
+  width:40px;
+  height:40px;
+  border:4px solid #333;
+  border-top:4px solid #d4af37;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  margin:15px auto;
 }
-
-button:disabled {
-  opacity: 0.6;
-}
-
-button:active {
-  transform: scale(0.96);
-}
-
-/* Chart */
-canvas {
-  width: 100%;
-  height: 120px;
-  margin-top: 20px;
-}
-
-/* History */
-.history {
-  margin-top: 15px;
-  font-size: 12px;
-  color: #aaa;
-}
-
-.history span {
-  color: #d4af37;
-}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 
 <body>
 
 <div class="app">
-  <h1>PREDICTOR 100</h1>
+<h1>PREDICTOR 100</h1>
 
-  <div class="balance">Balance: $<span id="balance">1000</span></div>
+<div class="balance">
+  <div>Balance: $<span id="balance">1000</span></div>
+  <button onclick="openDeposit()">Deposit</button>
+</div>
 
+<!-- Number Prediction -->
+<div class="card">
   <div class="number-box" id="number">--</div>
+  <input id="bet" type="number" placeholder="Bet Amount">
+  <input id="guess" type="number" placeholder="Pick 1–100">
+  <button onclick="predict()">Predict Number</button>
+</div>
 
-  <div class="inputs">
-    <input type="number" id="bet" placeholder="Bet $" min="1">
-    <input type="number" id="guess" placeholder="Pick 1-100" min="1" max="100">
+<!-- Color Betting -->
+<div class="card">
+  <h3 style="margin-bottom:10px;color:#aaa">Color Bet</h3>
+  <input id="colorBet" type="number" placeholder="Bet Amount">
+  <div class="row">
+    <button class="color-btn red" onclick="colorBet('Red')">RED</button>
+    <button class="color-btn blue" onclick="colorBet('Blue')">BLUE</button>
   </div>
+  <div id="colorResult" class="result-color"></div>
+</div>
 
-  <button id="btn" onclick="predict()">PREDICT NOW</button>
+</div>
 
-  <canvas id="chart"></canvas>
-
-  <div class="history" id="history">Last Results:</div>
+<!-- Deposit Modal -->
+<div class="deposit-modal" id="depositModal">
+  <div class="deposit-box">
+    <h3>Dummy Bank</h3>
+    <input id="depositAmount" type="number" placeholder="Enter Amount">
+    <div class="loader" id="loader" style="display:none"></div>
+    <button onclick="deposit()">Confirm Deposit</button>
+  </div>
 </div>
 
 <script>
 let balance = 1000;
-let history = [];
-let income = [];
-let outcome = [];
 
-const ctx = document.getElementById("chart").getContext("2d");
-
-function drawChart() {
-  ctx.clearRect(0,0,300,150);
-
-  const max = Math.max(...income, ...outcome, 1);
-  income.forEach((val,i)=>{
-    ctx.fillStyle = "#00ffd5";
-    ctx.fillRect(i*25, 120 - (val/max)*100, 8, (val/max)*100);
-  });
-  outcome.forEach((val,i)=>{
-    ctx.fillStyle = "#ff4d4d";
-    ctx.fillRect(i*25+10, 120 - (val/max)*100, 8, (val/max)*100);
-  });
+function updateBalance(){
+  document.getElementById("balance").textContent = balance;
 }
 
-function predict() {
-  const bet = Number(document.getElementById("bet").value);
-  const guess = Number(document.getElementById("guess").value);
-  const btn = document.getElementById("btn");
-  const display = document.getElementById("number");
-
-  if (!bet || !guess || bet > balance || guess < 1 || guess > 100) return;
-
-  btn.disabled = true;
-  let spins = 0;
-
-  const spin = setInterval(()=>{
-    display.textContent = Math.floor(Math.random()*100)+1;
+function predict(){
+  const bet = +betInput.value;
+  const guess = +guessInput.value;
+  if(bet>balance||!bet||guess<1||guess>100)return;
+  let spins=0;
+  const interval=setInterval(()=>{
+    number.textContent=Math.floor(Math.random()*100)+1;
     spins++;
-    if (spins > 20) {
-      clearInterval(spin);
-      const result = Math.floor(Math.random()*100)+1;
-      display.textContent = result;
-
-      if (result === guess) {
-        const win = bet * 2;
-        balance += win;
-        income.push(win);
-        outcome.push(0);
-      } else {
-        balance -= bet;
-        income.push(0);
-        outcome.push(bet);
-      }
-
-      document.getElementById("balance").textContent = balance;
-      saveHistory(result);
-      drawChart();
-      btn.disabled = false;
+    if(spins>20){
+      clearInterval(interval);
+      const result=Math.floor(Math.random()*100)+1;
+      number.textContent=result;
+      if(result===guess) balance+=bet*2;
+      else balance-=bet;
+      updateBalance();
     }
   },50);
 }
 
-function saveHistory(num) {
-  history.unshift(num);
-  if (history.length > 5) history.pop();
-  document.getElementById("history").innerHTML =
-    "Last Results: " + history.map(n=>`<span>${n}</span>`).join(" · ");
+function colorBet(color){
+  const bet=+colorBetInput.value;
+  if(bet>balance||!bet)return;
+  balance-=bet;
+  updateBalance();
+  colorResult.textContent="Spinning...";
+  setTimeout(()=>{
+    colorResult.textContent="RESULT: GREEN";
+    colorResult.style.background="#27ae60";
+  },1200);
 }
+
+function openDeposit(){
+  depositModal.style.display="flex";
+}
+
+function deposit(){
+  const amt=+depositAmount.value;
+  if(!amt)return;
+  loader.style.display="block";
+  setTimeout(()=>{
+    loader.style.display="none";
+    balance+=amt;
+    updateBalance();
+    depositModal.style.display="none";
+    depositAmount.value="";
+  },2000);
+}
+
+const betInput=document.getElementById("bet");
+const guessInput=document.getElementById("guess");
+const colorBetInput=document.getElementById("colorBet");
+const number=document.getElementById("number");
+const colorResult=document.getElementById("colorResult");
+const depositModal=document.getElementById("depositModal");
+const loader=document.getElementById("loader");
 </script>
 
 </body>
