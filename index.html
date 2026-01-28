@@ -6,7 +6,6 @@
 <title>Predictor 100</title>
 
 <style>
-/* ===== RESET ===== */
 * {
   margin: 0;
   padding: 0;
@@ -14,7 +13,6 @@
   font-family: 'Poppins', sans-serif;
 }
 
-/* ===== BODY ===== */
 body {
   height: 100vh;
   background: radial-gradient(circle at top, #1a1a1a, #000);
@@ -24,7 +22,6 @@ body {
   color: #fff;
 }
 
-/* ===== APP CONTAINER ===== */
 .app {
   width: 100%;
   max-width: 360px;
@@ -32,36 +29,61 @@ body {
   text-align: center;
 }
 
-/* ===== HEADER ===== */
 h1 {
   font-size: 20px;
   letter-spacing: 3px;
   color: #d4af37;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
 }
 
-/* ===== NUMBER DISPLAY ===== */
+/* Balance */
+.balance {
+  font-size: 14px;
+  color: #00ffd5;
+  margin-bottom: 15px;
+}
+
+/* Number Display */
 .number-box {
-  height: 120px;
+  height: 110px;
   background: linear-gradient(145deg, #0d0d0d, #1f1f1f);
   border-radius: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 64px;
+  font-size: 60px;
   font-weight: 700;
   color: #00ffd5;
-  box-shadow:
-    0 0 20px rgba(0, 255, 213, 0.2),
-    inset 0 0 10px rgba(255, 255, 255, 0.05);
-  margin-bottom: 30px;
-  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0,255,213,0.2);
+  margin-bottom: 20px;
 }
 
-/* ===== BUTTON ===== */
+/* Inputs */
+.inputs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: #111;
+  color: #fff;
+  text-align: center;
+  font-size: 14px;
+}
+
+input::placeholder {
+  color: #666;
+}
+
+/* Button */
 button {
   width: 100%;
-  padding: 15px;
+  padding: 14px;
   font-size: 16px;
   border: none;
   border-radius: 50px;
@@ -69,24 +91,33 @@ button {
   color: #000;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
-  transition: all 0.25s ease;
+  box-shadow: 0 10px 25px rgba(212,175,55,0.4);
+  transition: 0.2s;
+}
+
+button:disabled {
+  opacity: 0.6;
 }
 
 button:active {
-  transform: scale(0.95);
-  box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
+  transform: scale(0.96);
 }
 
-/* ===== HISTORY ===== */
+/* Chart */
+canvas {
+  width: 100%;
+  height: 120px;
+  margin-top: 20px;
+}
+
+/* History */
 .history {
-  margin-top: 25px;
+  margin-top: 15px;
   font-size: 12px;
   color: #aaa;
 }
 
 .history span {
-  margin: 0 4px;
   color: #d4af37;
 }
 </style>
@@ -97,41 +128,87 @@ button:active {
 <div class="app">
   <h1>PREDICTOR 100</h1>
 
+  <div class="balance">Balance: $<span id="balance">1000</span></div>
+
   <div class="number-box" id="number">--</div>
 
-  <button onclick="predict()">PREDICT NOW</button>
-
-  <div class="history" id="history">
-    Last Results:
+  <div class="inputs">
+    <input type="number" id="bet" placeholder="Bet $" min="1">
+    <input type="number" id="guess" placeholder="Pick 1-100" min="1" max="100">
   </div>
+
+  <button id="btn" onclick="predict()">PREDICT NOW</button>
+
+  <canvas id="chart"></canvas>
+
+  <div class="history" id="history">Last Results:</div>
 </div>
 
 <script>
+let balance = 1000;
 let history = [];
+let income = [];
+let outcome = [];
+
+const ctx = document.getElementById("chart").getContext("2d");
+
+function drawChart() {
+  ctx.clearRect(0,0,300,150);
+
+  const max = Math.max(...income, ...outcome, 1);
+  income.forEach((val,i)=>{
+    ctx.fillStyle = "#00ffd5";
+    ctx.fillRect(i*25, 120 - (val/max)*100, 8, (val/max)*100);
+  });
+  outcome.forEach((val,i)=>{
+    ctx.fillStyle = "#ff4d4d";
+    ctx.fillRect(i*25+10, 120 - (val/max)*100, 8, (val/max)*100);
+  });
+}
 
 function predict() {
+  const bet = Number(document.getElementById("bet").value);
+  const guess = Number(document.getElementById("guess").value);
+  const btn = document.getElementById("btn");
   const display = document.getElementById("number");
-  let count = 0;
 
-  // Slot-machine animation
-  const interval = setInterval(() => {
-    display.textContent = Math.floor(Math.random() * 100) + 1;
-    count++;
-    if (count > 20) {
-      clearInterval(interval);
-      const finalNumber = Math.floor(Math.random() * 100) + 1;
-      display.textContent = finalNumber;
-      saveHistory(finalNumber);
+  if (!bet || !guess || bet > balance || guess < 1 || guess > 100) return;
+
+  btn.disabled = true;
+  let spins = 0;
+
+  const spin = setInterval(()=>{
+    display.textContent = Math.floor(Math.random()*100)+1;
+    spins++;
+    if (spins > 20) {
+      clearInterval(spin);
+      const result = Math.floor(Math.random()*100)+1;
+      display.textContent = result;
+
+      if (result === guess) {
+        const win = bet * 2;
+        balance += win;
+        income.push(win);
+        outcome.push(0);
+      } else {
+        balance -= bet;
+        income.push(0);
+        outcome.push(bet);
+      }
+
+      document.getElementById("balance").textContent = balance;
+      saveHistory(result);
+      drawChart();
+      btn.disabled = false;
     }
-  }, 50);
+  },50);
 }
 
 function saveHistory(num) {
   history.unshift(num);
   if (history.length > 5) history.pop();
-
   document.getElementById("history").innerHTML =
-    "Last Results: " + history.map(n => `<span>${n}</span>`).join("·");
+    "Last Results: " + history.map(n=>`<span>${n}</span>`).join(" · ");
 }
 </script>
 
